@@ -1,12 +1,17 @@
 <template>
   <div class="home">
-    Free Cell
+    <Header />
+    <Playground />
   </div>
 </template>
 
 <script>
+import Header from '@/components/Header';
+import Playground from '@/components/Playground';
 export default {
   name: 'home',
-  components: {}
+  components: { Playground, Header }
 };
 </script>
+
+<style></style>
