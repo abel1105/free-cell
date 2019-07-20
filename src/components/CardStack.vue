@@ -1,18 +1,9 @@
 <template>
   <div
     class="playground-holder"
-    :class="{ 'playground-holder--card': stack.length > 0 }"
+    :class="{ 'playground-holder--card': stack[0].items.length > 0 }"
   >
-    <ul class="playground-stack">
-      <li
-        v-for="(item, index) in stack"
-        :key="index"
-        class="playground-stack-card"
-        :style="{ top: getTop(index), zIndex: index }"
-      >
-        <img :src="getImgUrl(item)" />
-      </li>
-    </ul>
+    <Card :index="-1" :list="stack" :stackIndex="index" />
   </div>
 </template>
 
@@ -20,18 +11,16 @@
 export default {
   name: 'CardStack',
   props: {
+    index: {
+      type: Number,
+      default: null
+    },
     stack: {
       type: Array,
-      default: () => []
-    }
-  },
-  methods: {
-    getTop(index) {
-      return index * 25 + 'px';
-    },
-    getImgUrl(item) {
-      return require(`../assets/svg/card-${item.type}-${item.number}.svg`);
+      default: null
     }
   }
 };
 </script>
+
+<style lang="scss" scoped></style>

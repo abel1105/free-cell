@@ -13,8 +13,8 @@
       <div class="playground-foundation"></div>
       <div class="playground-foundation"></div>
       <div class="playground-foundation"></div>
-      <template v-for="(item, index) in stacks">
-        <CardStack :key="index" :stack="item" />
+      <template v-for="(stack, index) in stacks">
+        <CardStack :key="index" :index="index" :stack="stack" />
       </template>
     </div>
   </div>
@@ -22,13 +22,14 @@
 
 <script>
 import CardStack from '@/components/CardStack';
+import { getRandomCardsStack } from '@/helpers/cards';
 export default {
   name: 'Playground',
   components: { CardStack },
-  computed: {
-    stacks() {
-      return this.$store.state.stacks;
-    }
+  data() {
+    return {
+      stacks: getRandomCardsStack()
+    };
   }
 };
 </script>
@@ -93,16 +94,6 @@ export default {
       &::after {
         background: url('../assets/svg/diamond-24px-white.svg');
       }
-    }
-  }
-
-  &-stack {
-    margin: 0;
-    padding: 0;
-    position: relative;
-
-    &-card {
-      position: absolute;
     }
   }
 }

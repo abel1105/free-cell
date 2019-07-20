@@ -36,6 +36,7 @@ export default {
   top: 0;
   height: 54px;
   width: 100vw;
+  z-index: 1000;
   background: $dark_black;
 
   &-container {
