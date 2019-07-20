@@ -3,7 +3,12 @@
     class="playground-holder"
     :class="{ 'playground-holder--card': stack[0].items.length > 0 }"
   >
-    <Card :index="-1" :list="stack" :stackIndex="index" />
+    <Card
+      :index="-1"
+      :list="stack"
+      :stackIndex="index"
+      :is-clear="stack[0].items.length === 0"
+    />
   </div>
 </template>
 

@@ -39,7 +39,7 @@ export const isDraggable = stack => {
   return true;
 };
 
-export const CARD_TYPES = ['spade', 'diamond', 'club', 'heart'];
+export const CARD_TYPES = ['spade', 'heart', 'club', 'diamond'];
 
 export const getRandomCardsStack = () => {
   const allCards = [];

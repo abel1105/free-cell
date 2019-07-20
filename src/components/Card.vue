@@ -2,12 +2,14 @@
   <draggable
     class="card-wrapper"
     :data-index="index"
+    :data-isReserve="isReserve"
+    :data-isClear="isClear"
     :data-stackIndex="stackIndex"
     :data-parentType="parentType"
     :data-parentNumber="parentNumber"
     :class="{
       'card-wrapper--first': index === 0,
-      'card-wrapper--last': list.length === 0 && (isDragging || onDragging),
+      'card-wrapper--last': list.length === 0 || onDragging,
       'card-wrapper--drag': onDragging
     }"
     :style="{
@@ -49,6 +51,8 @@
         :parent-type="item.type"
         :parent-number="item.number"
         :stack-index="stackIndex"
+        :is-reserve="isReserve"
+        :is-clear="isClear"
       />
     </li>
   </draggable>
@@ -86,6 +90,25 @@ export default {
     parentNumber: {
       type: Number,
       default: null
+    },
+    isReserve: {
+      type: Boolean,
+      default: false
+    },
+    isClear: {
+      type: Boolean,
+      default: false
+    }
+  },
+  mounted() {
+    this.checkFoundation();
+  },
+  updated() {
+    this.checkFoundation();
+  },
+  watch: {
+    foundationValue() {
+      this.checkFoundation();
     }
   },
   computed: {
@@ -115,6 +138,12 @@ export default {
     },
     isDragging() {
       return this.$store.state.isDragging;
+    },
+    foundationValue() {
+      if (this.list[0]) {
+        return this.$store.state.foundation[this.list[0].type];
+      }
+      return null;
     }
   },
   methods: {
@@ -133,21 +162,38 @@ export default {
       this.$store.commit('toggleIsDragging');
     },
     move(evt) {
-      console.log(evt.draggedContext, evt.relatedContext);
+      // console.log(evt.draggedContext, evt.relatedContext);
       const { element: origin, futureIndex } = evt.draggedContext;
       const {
         list: targetList,
         component: targetComponent
       } = evt.relatedContext;
-      console.log(targetComponent.$attrs['data-stackIndex'], this.stackIndex);
+
+      const attrs = targetComponent.$attrs;
+
+      if (attrs['data-isClear']) {
+        if (origin.number === 13) {
+          return true;
+        }
+        return false;
+      }
+
+      if (attrs['data-isReserve']) {
+        if (targetList.length !== 0 || attrs['data-parentType']) {
+          return false;
+        }
+        return true;
+      }
 
       // future index should always be 0
       if (futureIndex !== 0) {
-        // console.log('futureIndex', futureIndex);
         return false;
       }
       // future can be this one
-      if (targetComponent.$attrs['data-stackIndex'] === this.stackIndex) {
+      if (
+        attrs['data-isReserve'] === this.isReserve &&
+        attrs['data-stackIndex'] === this.stackIndex
+      ) {
         return true;
       }
       // future should be the last item
@@ -156,11 +202,22 @@ export default {
       }
 
       const target = {
-        type: targetComponent.$attrs['data-parentType'],
-        number: targetComponent.$attrs['data-parentNumber']
+        type: attrs['data-parentType'],
+        number: attrs['data-parentNumber']
       };
       if (!isMatch(target, origin)) {
         return false;
+      }
+
+      console.log('PASS');
+    },
+    checkFoundation() {
+      if (this.isLastOne && this.list[0]) {
+        const { type, number } = this.list[0];
+        if (this.$store.state.foundation[type] + 1 === number) {
+          this.$store.commit('setFoundation', type);
+          this.list.splice(0, 1);
+        }
       }
     }
   }

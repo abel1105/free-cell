@@ -1,20 +1,14 @@
 <template>
   <div class="playground">
     <div class="playground-container">
-      <div class="playground-reserve playground-reserve--card">
-        <img src="../assets/svg/card-club-1.svg" />
-      </div>
-      <div class="playground-reserve"></div>
-      <div class="playground-reserve"></div>
-      <div class="playground-reserve"></div>
-      <div class="playground-foundation playground-foundation--card">
-        <img src="../assets/svg/card-club-1.svg" />
-      </div>
-      <div class="playground-foundation"></div>
-      <div class="playground-foundation"></div>
-      <div class="playground-foundation"></div>
+      <template v-for="(type, index) in CARD_TYPES">
+        <CardFoundation :key="`foundation_${index}`" :type="type" />
+      </template>
+      <template v-for="(stack, index) in reserve">
+        <CardReserve :key="`reserve_${index}`" :index="index" :stack="stack" />
+      </template>
       <template v-for="(stack, index) in stacks">
-        <CardStack :key="index" :index="index" :stack="stack" />
+        <CardStack :key="`stack_${index}`" :index="index" :stack="stack" />
       </template>
     </div>
   </div>
@@ -22,14 +16,27 @@
 
 <script>
 import CardStack from '@/components/CardStack';
-import { getRandomCardsStack } from '@/helpers/cards';
+import { CARD_TYPES, getRandomCardsStack } from '@/helpers/cards';
+import CardReserve from '@/components/CardReserve';
+import CardFoundation from '@/components/CardFoundation';
 export default {
   name: 'Playground',
-  components: { CardStack },
+  components: { CardFoundation, CardReserve, CardStack },
   data() {
     return {
+      reserve: [
+        [{ items: [] }],
+        [{ items: [] }],
+        [{ items: [] }],
+        [{ items: [] }]
+      ],
       stacks: getRandomCardsStack()
     };
+  },
+  computed: {
+    CARD_TYPES() {
+      return CARD_TYPES;
+    }
   }
 };
 </script>
@@ -60,40 +67,6 @@ export default {
 
     &--card {
       padding-top: unset;
-    }
-  }
-
-  &-reserve {
-    &::after {
-      position: absolute;
-      content: '';
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 24px;
-      height: 24px;
-      opacity: 0.2;
-    }
-
-    &:nth-child(1) {
-      &::after {
-        background: url('../assets/svg/spade-24px-white.svg');
-      }
-    }
-    &:nth-child(2) {
-      &::after {
-        background: url('../assets/svg/heart-24px-white.svg');
-      }
-    }
-    &:nth-child(3) {
-      &::after {
-        background: url('../assets/svg/club-24px-white.svg');
-      }
-    }
-    &:nth-child(4) {
-      &::after {
-        background: url('../assets/svg/diamond-24px-white.svg');
-      }
     }
   }
 }
