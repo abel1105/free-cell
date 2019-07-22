@@ -9,7 +9,7 @@
     :data-parentNumber="parentNumber"
     :class="{
       'card-wrapper--first': index === 0,
-      'card-wrapper--last': list.length === 0 || onDragging,
+      'card-wrapper--last': list.length === 0 && (isDragging || onDragging),
       'card-wrapper--drag': onDragging
     }"
     :style="{
@@ -20,8 +20,10 @@
     :list="list"
     tag="ul"
     :disabled="!isDraggable"
+    :fallback-tolerance="10"
     @start="dragStart"
     @end="dragEnd"
+    @change="onChange"
     :move="move"
   >
     <li
@@ -53,6 +55,7 @@
         :stack-index="stackIndex"
         :is-reserve="isReserve"
         :is-clear="isClear"
+        :on-change="onChange"
       />
     </li>
   </draggable>
@@ -98,6 +101,10 @@ export default {
     isClear: {
       type: Boolean,
       default: false
+    },
+    onChange: {
+      type: Function,
+      default: () => {}
     }
   },
   mounted() {

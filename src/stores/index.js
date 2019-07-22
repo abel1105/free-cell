@@ -11,7 +11,13 @@ export default new Vuex.Store({
       club: 0,
       heart: 0
     },
-    isDragging: false
+    isDragging: false,
+    log: []
+  },
+  getters: {
+    lastLog(state) {
+      return state.log[state.log.length - 1];
+    }
   },
   mutations: {
     toggleIsDragging(state) {
@@ -19,6 +25,25 @@ export default new Vuex.Store({
     },
     setFoundation(state, type) {
       state.foundation[type] += 1;
+    },
+    addLog(state, data) {
+      state.log.push({
+        foundation: JSON.stringify(state.foundation),
+        data
+      });
+    },
+    setLog(state, { foundation }) {
+      state.log.pop();
+      state.foundation = foundation;
+    },
+    restart(state) {
+      state.log = [];
+      state.foundation = {
+        spade: 0,
+        diamond: 0,
+        club: 0,
+        heart: 0
+      };
     }
   },
   actions: {}

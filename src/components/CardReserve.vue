@@ -3,7 +3,13 @@
     class="playground-reserve"
     :class="{ 'playground-reserve--card': stack[0].items.length > 0 }"
   >
-    <Card :index="-1" :list="stack" :stackIndex="index" :is-reserve="true" />
+    <Card
+      :index="-1"
+      :list="stack"
+      :stackIndex="index"
+      :is-reserve="true"
+      :on-change="onChange"
+    />
   </div>
 </template>
 
@@ -18,6 +24,10 @@ export default {
     stack: {
       type: Array,
       default: null
+    },
+    onChange: {
+      type: Function,
+      default: () => {}
     }
   }
 };

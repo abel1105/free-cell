@@ -8,6 +8,7 @@
       :list="stack"
       :stackIndex="index"
       :is-clear="stack[0].items.length === 0"
+      :on-change="onChange"
     />
   </div>
 </template>
@@ -23,6 +24,10 @@ export default {
     stack: {
       type: Array,
       default: null
+    },
+    onChange: {
+      type: Function,
+      default: () => {}
     }
   }
 };
