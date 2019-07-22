@@ -1,5 +1,6 @@
 <template>
   <div
+    :id="`foundation_${this.type}`"
     class="playground-foundation"
     :class="{ 'playground-foundation--card': number !== 0 }"
   >
@@ -30,6 +31,17 @@ export default {
 <style lang="scss" scoped>
 .playground {
   &-foundation {
+    &,
+    & * {
+      -moz-user-select: none; /* These user-select properties are inheritable, used to prevent text selection */
+      -webkit-user-select: none;
+      -ms-user-select: none; /* From IE10 only */
+      user-select: none; /* Not valid CSS yet, as of July 2012 */
+
+      -webkit-user-drag: none; /* Prevents dragging of images/divs etc */
+      user-drag: none;
+    }
+
     &::before {
       position: absolute;
       content: '';
@@ -39,6 +51,7 @@ export default {
       width: 24px;
       height: 24px;
       opacity: 0.2;
+      z-index: -1;
     }
 
     &:nth-child(1) {

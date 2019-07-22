@@ -19,7 +19,7 @@
     group="list"
     :list="list"
     tag="ul"
-    :disabled="!isDraggable"
+    :disabled="isLock || !isDraggable"
     :fallback-tolerance="10"
     @start="dragStart"
     @end="dragEnd"
@@ -34,6 +34,8 @@
     >
       <template v-if="item.number">
         <img
+          ref="cardImg"
+          class="card-img"
           :class="{ 'card-img--noDrag': !isDraggable }"
           v-if="isLastOne"
           :src="getImgUrl(item)"
@@ -133,10 +135,7 @@ export default {
       return !!this.list[0] && !!this.list[0].items;
     },
     getTop() {
-      // if (this.list.length !== 0) return 0;
       if (this.list.length !== 0 && this.list[0].items.items) return 0;
-
-      // const index = this.onDragging ? this.index + 1 : this.index;
 
       return `${this.index * 25}px`;
     },
@@ -145,6 +144,9 @@ export default {
     },
     isDragging() {
       return this.$store.state.isDragging;
+    },
+    isLock() {
+      return this.$store.state.isLock;
     },
     foundationValue() {
       if (this.list[0]) {
@@ -156,9 +158,6 @@ export default {
   methods: {
     getImgUrl(item) {
       return require(`../assets/svg/card-${item.type}-${item.number}.svg`);
-    },
-    log(evt) {
-      console.log(evt, JSON.stringify(this.list));
     },
     dragStart() {
       this.onDragging = true;
@@ -184,8 +183,17 @@ export default {
         }
         return false;
       }
-
+      // the same
+      if (targetList[0] === origin) {
+        return true;
+      }
+      // when is reserve
       if (attrs['data-isReserve']) {
+        // stop it if origin has more than one
+        if (origin.items && origin.items.length !== 0) {
+          return false;
+        }
+        // stop it if already have card
         if (targetList.length !== 0 || attrs['data-parentType']) {
           return false;
         }
@@ -196,13 +204,7 @@ export default {
       if (futureIndex !== 0) {
         return false;
       }
-      // future can be this one
-      if (
-        attrs['data-isReserve'] === this.isReserve &&
-        attrs['data-stackIndex'] === this.stackIndex
-      ) {
-        return true;
-      }
+
       // future should be the last item
       if (targetList.length !== 0) {
         return false;
@@ -215,15 +217,32 @@ export default {
       if (!isMatch(target, origin)) {
         return false;
       }
-
-      console.log('PASS');
     },
     checkFoundation() {
       if (this.isLastOne && this.list[0]) {
         const { type, number } = this.list[0];
-        if (this.$store.state.foundation[type] + 1 === number) {
-          this.$store.commit('setFoundation', type);
-          this.list.splice(0, 1);
+        if (
+          !this.isLock &&
+          this.$store.state.foundation[type] + 1 === number &&
+          this.$refs.cardImg[0]
+        ) {
+          this.$store.commit('toggleIsLock');
+          const {
+            x: sourceX,
+            y: sourceY
+          } = this.$refs.cardImg[0].getBoundingClientRect();
+          const { x: targetX, y: targetY } = document
+            .getElementById(`foundation_${type}`)
+            .getBoundingClientRect();
+          this.$refs.cardImg[0].style.transform = `translate(${targetX -
+            sourceX}px, ${targetY - sourceY}px)`;
+
+          // after transition
+          setTimeout(() => {
+            this.list.splice(0, 1);
+            this.$store.commit('toggleIsLock');
+            this.$store.commit('setFoundation', type);
+          }, 500);
         }
       }
     }
@@ -270,6 +289,10 @@ export default {
 
     -webkit-user-drag: none; /* Prevents dragging of images/divs etc */
     user-drag: none;
+  }
+
+  &-img {
+    transition: all 0.5s;
   }
 
   &-imgBg {

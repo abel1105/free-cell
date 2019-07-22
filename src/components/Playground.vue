@@ -92,6 +92,7 @@ export default {
       if (this.isNewLog) {
         this.isNewLog = false;
         this.undo();
+        this.onChange();
       }
     },
     restart() {

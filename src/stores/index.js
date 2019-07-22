@@ -11,6 +11,7 @@ export default new Vuex.Store({
       club: 0,
       heart: 0
     },
+    isLock: false,
     isDragging: false,
     log: []
   },
@@ -20,6 +21,9 @@ export default new Vuex.Store({
     }
   },
   mutations: {
+    toggleIsLock(state) {
+      state.isLock = !state.isLock;
+    },
     toggleIsDragging(state) {
       state.isDragging = !state.isDragging;
     },
