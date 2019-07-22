@@ -5,17 +5,17 @@
         <span>FREE</span>
         <span class="header-logoEnd">CELL</span>
       </h1>
-      <h1 class="header-timer">03:00</h1>
+      <h1 class="header-timer">{{ clock }}</h1>
       <div class="header-action">
-        <div class="header-actionIcon">
+        <div class="header-actionIcon" @click="undo">
           <md-icon>undo</md-icon>
           UNDO
         </div>
-        <div class="header-actionIcon">
+        <div class="header-actionIcon" @click="pause">
           <md-icon>pause</md-icon>
           PAUSE
         </div>
-        <div class="header-actionIcon">
+        <div class="header-actionIcon" @click="restart">
           <md-icon>autorenew</md-icon>
           RESTART
         </div>
@@ -25,8 +25,36 @@
 </template>
 
 <script>
+import _ from 'lodash';
 export default {
-  name: 'Header'
+  name: 'Header',
+  props: {
+    undo: {
+      type: Function,
+      default: () => {}
+    },
+    pause: {
+      type: Function,
+      default: () => {}
+    },
+    restart: {
+      type: Function,
+      default: () => {}
+    },
+    time: {
+      type: Number,
+      default: 0
+    }
+  },
+  computed: {
+    clock() {
+      return `${_.padStart(Math.floor(this.time / 60), 2, '0')}:${_.padStart(
+        this.time % 60,
+        2,
+        '0'
+      )}`;
+    }
+  }
 };
 </script>
 
@@ -36,6 +64,7 @@ export default {
   top: 0;
   height: 54px;
   width: 100vw;
+  z-index: 1000;
   background: $dark_black;
 
   &-container {
@@ -67,6 +96,7 @@ export default {
     justify-self: end;
     font-size: 16px;
     font-weight: bold;
+    cursor: pointer;
 
     &Icon {
       margin-right: 25px;

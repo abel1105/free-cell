@@ -1,33 +1,115 @@
 <template>
-  <div class="playground">
-    <div class="playground-container">
-      <div class="playground-reserve playground-reserve--card">
-        <img src="../assets/svg/card-club-1.svg" />
+  <div>
+    <Header :undo="undo" :time="time" :pause="stopClock" :restart="restart" />
+    <div class="playground">
+      <div class="playground-container">
+        <template v-for="(type, index) in CARD_TYPES">
+          <CardFoundation :key="`foundation_${index}`" :type="type" />
+        </template>
+        <template v-for="(stack, index) in reserve">
+          <CardReserve
+            :key="`reserve_${index}`"
+            :index="index"
+            :stack="stack"
+            :on-change="onChange"
+          />
+        </template>
+        <template v-for="(stack, index) in stacks">
+          <CardStack
+            :key="`stack_${index}`"
+            :index="index"
+            :stack="stack"
+            :on-change="onChange"
+          />
+        </template>
       </div>
-      <div class="playground-reserve"></div>
-      <div class="playground-reserve"></div>
-      <div class="playground-reserve"></div>
-      <div class="playground-foundation playground-foundation--card">
-        <img src="../assets/svg/card-club-1.svg" />
-      </div>
-      <div class="playground-foundation"></div>
-      <div class="playground-foundation"></div>
-      <div class="playground-foundation"></div>
-      <template v-for="(item, index) in stacks">
-        <CardStack :key="index" :stack="item" />
-      </template>
     </div>
   </div>
 </template>
 
 <script>
+import _ from 'lodash';
 import CardStack from '@/components/CardStack';
+import { CARD_TYPES, getRandomCardsStack } from '@/helpers/cards';
+import CardReserve from '@/components/CardReserve';
+import CardFoundation from '@/components/CardFoundation';
+import Header from '@/components/Header';
 export default {
   name: 'Playground',
-  components: { CardStack },
+  components: { Header, CardFoundation, CardReserve, CardStack },
+  data() {
+    return {
+      reserve: [
+        [{ items: [] }],
+        [{ items: [] }],
+        [{ items: [] }],
+        [{ items: [] }]
+      ],
+      stacks: getRandomCardsStack(),
+      isNewLog: true,
+      time: 0,
+      timer: null
+    };
+  },
+  mounted() {
+    this.onChange();
+  },
   computed: {
-    stacks() {
-      return this.$store.state.stacks;
+    CARD_TYPES() {
+      return CARD_TYPES;
+    }
+  },
+  methods: {
+    startClock() {
+      if (!this.timer) {
+        this.timer = setInterval(() => {
+          this.time = this.time + 1;
+        }, 1000);
+      }
+    },
+    stopClock() {
+      if (this.timer) {
+        clearInterval(this.timer);
+        this.timer = null;
+      }
+    },
+    onChange: _.debounce(function() {
+      this.startClock();
+      this.isNewLog = true;
+      this.$store.commit('addLog', JSON.stringify(this.$data));
+    }, 400),
+    undo() {
+      const lastLog = this.$store.getters.lastLog;
+      if (!lastLog) return false;
+
+      this.$store.commit('setLog', {
+        foundation: JSON.parse(lastLog.foundation)
+      });
+      const { reserve, stacks } = JSON.parse(lastLog.data);
+      this.reserve = reserve;
+      this.stacks = stacks;
+      // to undo again due to log is created after made
+      if (this.isNewLog) {
+        this.isNewLog = false;
+        this.undo();
+      }
+    },
+    restart() {
+      this.stopClock();
+      this.reserve = [
+        [{ items: [] }],
+        [{ items: [] }],
+        [{ items: [] }],
+        [{ items: [] }]
+      ];
+      this.stacks = getRandomCardsStack();
+      this.isNewLog = true;
+      this.time = 0;
+      this.timer = null;
+      this.$store.commit('restart');
+      this.$nextTick(() => {
+        this.onChange();
+      });
     }
   }
 };
@@ -59,50 +141,6 @@ export default {
 
     &--card {
       padding-top: unset;
-    }
-  }
-
-  &-reserve {
-    &::after {
-      position: absolute;
-      content: '';
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 24px;
-      height: 24px;
-      opacity: 0.2;
-    }
-
-    &:nth-child(1) {
-      &::after {
-        background: url('../assets/svg/spade-24px-white.svg');
-      }
-    }
-    &:nth-child(2) {
-      &::after {
-        background: url('../assets/svg/heart-24px-white.svg');
-      }
-    }
-    &:nth-child(3) {
-      &::after {
-        background: url('../assets/svg/club-24px-white.svg');
-      }
-    }
-    &:nth-child(4) {
-      &::after {
-        background: url('../assets/svg/diamond-24px-white.svg');
-      }
-    }
-  }
-
-  &-stack {
-    margin: 0;
-    padding: 0;
-    position: relative;
-
-    &-card {
-      position: absolute;
     }
   }
 }
